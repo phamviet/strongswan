@@ -36,7 +36,7 @@ conn %default
     right=%any
     rightauth=pubkey
     rightsourceip=${VPN_NETWORK_IPV4},${VPN_NETWORK_IPV6}
-    rightsubnets=${DUMMY_DEVICE}
+    rightsubnets=${LAN_NETWORK}
     rightdns=${VPN_DNS}
 
 conn ikev2-pubkey
