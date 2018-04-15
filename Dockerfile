@@ -1,12 +1,10 @@
-FROM alpine:edge
+FROM alpine
 
-ENV VPN_DEVICE="eth0"
 ENV VPN_NETWORK_IPV4="192.168.99.0/24"
 ENV VPN_NETWORK_IPV6="fd9d:bc11:4020::/48"
 ENV IKE_CIPHERS="aes128gcm16-prfsha512-ecp256!"
 ENV ESP_CIPHERS="aes128gcm16-ecp256!"
-ENV DUMMY_DEVICE="1.1.1.1/32"
-ENV VPN_DNS="1.1.1.1"
+ENV LAN_NETWORK="192.168.0.0/16"
 
 RUN apk add --no-cache iptables openssl strongswan util-linux \
     && ln -sf /etc/ipsec.d/ipsec.conf /etc/ipsec.conf \
