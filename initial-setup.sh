@@ -85,3 +85,175 @@ openssl pkcs12 -export \
                -caname "strongSwan Root CA" \
                -out /etc/ipsec.d/client.cert.p12 \
                -passout pass:${VPN_P12_PASSWORD}
+
+# gen mobileconfig for mac
+
+UUID1=$(uuidgen)
+UUID2=$(uuidgen)
+UUID3=$(uuidgen)
+UUID4=$(uuidgen)
+UUID5=$(uuidgen)
+UUID6=$(uuidgen)
+
+cat > /etc/ipsec.d/client.mobileconfig <<_EOF_
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+ <key>PayloadContent</key>
+ <array>
+  <dict>
+   <key>Password</key>
+   <string>${VPN_P12_PASSWORD}</string>
+   <key>PayloadCertificateFileName</key>
+   <string>client.cert.p12</string>
+   <key>PayloadContent</key>
+   <data>
+$(base64 /etc/ipsec.d/client.cert.p12)
+   </data>
+   <key>PayloadDescription</key>
+   <string>添加 PKCS#12 格式的证书</string>
+   <key>PayloadDisplayName</key>
+   <string>client.cert.p12</string>
+   <key>PayloadIdentifier</key>
+   <string>com.apple.security.pkcs12.${UUID1}</string>
+   <key>PayloadType</key>
+   <string>com.apple.security.pkcs12</string>
+   <key>PayloadUUID</key>
+   <string>${UUID1}</string>
+   <key>PayloadVersion</key>
+   <integer>1</integer>
+  </dict>
+  <dict>
+   <key>PayloadCertificateFileName</key>
+   <string>ca.cer</string>
+   <key>PayloadContent</key>
+   <data>
+$(base64 /etc/ipsec.d/cacerts/ca.cert.pem)
+   </data>
+   <key>PayloadDescription</key>
+   <string>添加 CA 根证书</string>
+   <key>PayloadDisplayName</key>
+   <string>strongSwan Root CA</string>
+   <key>PayloadIdentifier</key>
+   <string>com.apple.security.root.${UUID2}</string>
+   <key>PayloadType</key>
+   <string>com.apple.security.root</string>
+   <key>PayloadUUID</key>
+   <string>${UUID2}</string>
+   <key>PayloadVersion</key>
+   <integer>1</integer>
+  </dict>
+  <dict>
+   <key>IKEv2</key>
+   <dict>
+    <key>AuthenticationMethod</key>
+    <string>Certificate</string>
+    <key>ChildSecurityAssociationParameters</key>
+    <dict>
+     <key>DiffieHellmanGroup</key>
+     <integer>2</integer>
+     <key>EncryptionAlgorithm</key>
+     <string>3DES</string>
+     <key>IntegrityAlgorithm</key>
+     <string>SHA1-96</string>
+     <key>LifeTimeInMinutes</key>
+     <integer>1440</integer>
+    </dict>
+    <key>DeadPeerDetectionRate</key>
+    <string>Medium</string>
+    <key>DisableMOBIKE</key>
+    <integer>0</integer>
+    <key>DisableRedirect</key>
+    <integer>0</integer>
+    <key>EnableCertificateRevocationCheck</key>
+    <integer>0</integer>
+    <key>EnablePFS</key>
+    <integer>0</integer>
+    <key>IKESecurityAssociationParameters</key>
+    <dict>
+     <key>DiffieHellmanGroup</key>
+     <integer>2</integer>
+     <key>EncryptionAlgorithm</key>
+     <string>3DES</string>
+     <key>IntegrityAlgorithm</key>
+     <string>SHA1-96</string>
+     <key>LifeTimeInMinutes</key>
+     <integer>1440</integer>
+    </dict>
+    <key>LocalIdentifier</key>
+    <string>client@${VPN_DOMAIN}</string>
+    <key>PayloadCertificateUUID</key>
+    <string>${UUID1}</string>
+    <key>RemoteAddress</key>
+    <string>${VPN_DOMAIN}</string>
+    <key>RemoteIdentifier</key>
+    <string>${VPN_DOMAIN}</string>
+    <key>UseConfigurationAttributeInternalIPSubnet</key>
+    <integer>0</integer>
+   </dict>
+   <key>IPv4</key>
+   <dict>
+    <key>OverridePrimary</key>
+    <integer>1</integer>
+   </dict>
+   <key>PayloadDescription</key>
+   <string>Configures VPN settings</string>
+   <key>PayloadDisplayName</key>
+   <string>VPN</string>
+   <key>PayloadIdentifier</key>
+   <string>com.apple.vpn.managed.${UUID4}</string>
+   <key>PayloadType</key>
+   <string>com.apple.vpn.managed</string>
+   <key>PayloadUUID</key>
+   <string>${UUID4}</string>
+   <key>PayloadVersion</key>
+   <real>1</real>
+   <key>Proxies</key>
+   <dict>
+    <key>HTTPEnable</key>
+    <integer>0</integer>
+    <key>HTTPSEnable</key>
+    <integer>0</integer>
+   </dict>
+   <key>UserDefinedName</key>
+   <string>VPN (IKEv2)</string>
+   <key>VPNType</key>
+   <string>IKEv2</string>
+  </dict>
+  <dict>
+   <key>PayloadCertificateFileName</key>
+   <string>server.cer</string>
+   <key>PayloadContent</key>
+   <data>
+$(base64 /etc/ipsec.d/certs/server.cert.pem)
+   </data>
+   <key>PayloadDescription</key>
+   <string>添加 PKCS#1 格式的证书</string>
+   <key>PayloadDisplayName</key>
+   <string>${VPN_DOMAIN}</string>
+   <key>PayloadIdentifier</key>
+   <string>com.apple.security.pkcs1.${UUID5}</string>
+   <key>PayloadType</key>
+   <string>com.apple.security.pkcs1</string>
+   <key>PayloadUUID</key>
+   <string>${UUID5}</string>
+   <key>PayloadVersion</key>
+   <integer>1</integer>
+  </dict>
+ </array>
+ <key>PayloadDisplayName</key>
+ <string>VPN</string>
+ <key>PayloadIdentifier</key>
+ <string>com.github.vimagick.strongswan</string>
+ <key>PayloadRemovalDisallowed</key>
+ <false/>
+ <key>PayloadType</key>
+ <string>Configuration</string>
+ <key>PayloadUUID</key>
+ <string>${UUID6}</string>
+ <key>PayloadVersion</key>
+ <integer>1</integer>
+</dict>
+</plist>
+_EOF_
