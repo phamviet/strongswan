@@ -9,6 +9,7 @@ echo "Initializing..."
 VPN_P12_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32 ; echo '')
 echo ${VPN_P12_PASSWORD} > /etc/ipsec.d/client.cert.p12.password
 
+mkdir /etc/ipsec.d/certs /etc/ipsec.d/cacerts /etc/ipsec.d/private
 touch /etc/ipsec.d/triplets.dat
 cat > /etc/ipsec.d/ipsec.conf <<_EOF_
 config setup
@@ -36,7 +37,7 @@ conn %default
     right=%any
     rightauth=pubkey
     rightsourceip=${VPN_NETWORK_IPV4},${VPN_NETWORK_IPV6}
-    rightsubnets=${LAN_NETWORK}
+    rightsubnet=${LAN_NETWORK}
     rightdns=${VPN_DNS}
 
 conn ikev2-pubkey
